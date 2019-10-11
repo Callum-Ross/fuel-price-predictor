@@ -1,5 +1,7 @@
 import React from "react";
+import { useState, useEffect } from "react";
 import Select from "react-select";
+import siteDetails from "./api";
 class Dropdown extends React.Component {
   state = {
     selectedOption: null
@@ -46,6 +48,10 @@ class Dropdown extends React.Component {
   }
 }
 function App() {
+  const [sites, setSites] = useState([""]);
+  useEffect(() => {
+    siteDetails().then(res => setSites(res));
+  }, []);
   return (
     <div className="App" style={{ display: "flex" }}>
       <Dropdown />
