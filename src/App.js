@@ -114,7 +114,6 @@ function App() {
   useEffect(() => {
     fuelTypes().then(res => setTypes(res));
   }, []);
-  console.log(types);
   return (
     <div className="App">
       <div style={{ display: "flex", justifyContent: "space-around" }}>
