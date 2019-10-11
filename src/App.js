@@ -5,6 +5,9 @@ import makeAnimated from "react-select/animated";
 import { siteDetails, fuelTypes } from "./api";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
+import { AwesomeButton } from "react-awesome-button";
+import "react-awesome-button/dist/styles.css";
+import "./App.css";
 class TimePeriod extends React.Component {
   state = {
     startDate: new Date()
@@ -40,7 +43,7 @@ class Dropdown extends React.Component {
     const animatedComponents = makeAnimated();
     let displayed = this.props.displayed;
     const options = [];
-    let type = "Please select a time to predict, leave empty to select all...";
+    let type = "Loading...";
 
     if (typeof displayed.S !== "undefined") {
       if (this.props.props === 1) {
@@ -82,7 +85,7 @@ class Dropdown extends React.Component {
       <div
         style={{
           width: "30%",
-          paddingLeft: "2.5%",
+          //paddingLeft: "2.5%",
           zIndex: "auto"
           // position: "absolute"
         }}
@@ -114,10 +117,9 @@ function App() {
   console.log(types);
   return (
     <div className="App">
-      <div style={{ display: "flex" }}>
+      <div style={{ display: "flex", justifyContent: "space-around" }}>
         <Dropdown props={1} displayed={sites} />
         <Dropdown props={2} displayed={types} />
-        <Dropdown props={3} displayed={sites} />
       </div>
       <div
         style={{
@@ -128,6 +130,15 @@ function App() {
         <TimePeriod />
 
         <TimePeriod />
+      </div>
+      <div
+        style={{
+          justifyContent: "center",
+          display: "flex",
+          paddingTop: "2%"
+        }}
+      >
+        <AwesomeButton type="primary">Predict them Prices!</AwesomeButton>
       </div>
     </div>
   );
