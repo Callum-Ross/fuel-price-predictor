@@ -23,9 +23,8 @@ function randomColor() {
 class Charty extends React.Component {
   render() {
     var data = [];
-    console.log(this.props.predict);
+
     if (typeof this.props.predict[0] !== "undefined") {
-      console.log(this.props.predict[0]);
       for (var q of this.props.predict) {
         var prices = [];
         var label = [];
@@ -33,10 +32,10 @@ class Charty extends React.Component {
         for (var x of q.prediction.results) {
           var colour = randomColor();
 
-          console.log(x);
           label.push(x.date);
           prices.push(x.price);
-          line = "SiteID: " + x.siteid;
+          line = x.address;
+          console.log(x);
         }
         data.push({
           label: line,
@@ -66,7 +65,7 @@ class Charty extends React.Component {
           options={{
             title: {
               display: true,
-              text: "Average Rainfall per month",
+              text: "Fuel Price Predictor",
               fontSize: 20
             },
             legend: {
@@ -89,12 +88,11 @@ class Dropdown extends React.Component {
   handleChange = selectedOption => {
     this.setState({ selectedOption });
     this.props.setSelected(selectedOption);
-    console.log(selectedOption);
   };
   handleChange2 = Days => {
     this.setState({ Days });
     this.props.setDays(Days);
-    console.log(Days);
+    this.selectRef.select.blur();
   };
 
   render() {
@@ -152,6 +150,7 @@ class Dropdown extends React.Component {
               value={Days}
               onChange={this.handleChange2}
               options={options}
+              ref={input => (this.selectRef = input)}
               placeholder={type}
             />
           )}
@@ -165,7 +164,6 @@ function App() {
   const [predict, setPrediction] = useState([]);
   const [selected, setSelected] = useState([]);
   const [days, setDays] = useState([]);
-  console.log(predict);
   useEffect(() => {
     siteDetails().then(res => setSites(res));
   }, []);
@@ -214,7 +212,6 @@ function App() {
           onPress={async function() {
             var yes = await callPrices(selected, days);
             setPrediction(yes);
-            console.log(yes);
           }}
         >
           Predict them Prices!

@@ -24,14 +24,15 @@ export async function predictPrices(siteId, days) {
   someDate.setDate(someDate.getDate() + days); //number  of days to add, e.x. 15 days
   var dateFormated = someDate.toISOString().substr(0, 10);
 
-  console.log(dateFormated);
+  console.log(siteId.label);
   const params = {
-    siteid: siteId.value
+    siteid: siteId.value,
+    address: siteId.label
   };
   console.log(siteId.value);
 
   const url =
-    `http://20.43.96.83/predict?&startdate=2019-03-05&lat=yourquery&long=yourquery&address=yourquery&enddate=` +
+    `http://20.43.96.83/predict?&startdate=2019-03-05&lat=yourquery&long=yourquery&enddate=` +
     dateFormated;
   console.log(url);
 
