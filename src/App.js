@@ -40,7 +40,7 @@ class Charty extends React.Component {
         data.push({
           label: line,
           fill: false,
-          lineTension: 0.5,
+          lineTension: 0.9,
           backgroundColor: colour,
           borderColor: colour,
           borderWidth: 2,
@@ -168,7 +168,7 @@ function App() {
     siteDetails().then(res => setSites(res));
   }, []);
   var array = { Num: [] };
-  for (var i = 1; i < 15; i++) {
+  for (var i = 1; i < 20; i++) {
     array.Num.push({ value: i, label: i });
   }
   return (

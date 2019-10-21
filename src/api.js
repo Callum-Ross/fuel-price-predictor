@@ -20,7 +20,7 @@ export async function predictPrices(siteId, days) {
   //const proxyurl = "https://cors-anywhere.herokuapp.com/";
   console.log(siteId);
   let data = {};
-  var someDate = new Date("2019-03-05");
+  var someDate = new Date("2019-02-28");
   someDate.setDate(someDate.getDate() + days); //number  of days to add, e.x. 15 days
   var dateFormated = someDate.toISOString().substr(0, 10);
 
@@ -32,7 +32,7 @@ export async function predictPrices(siteId, days) {
   console.log(siteId.value);
 
   const url =
-    `http://20.43.96.83/predict?&startdate=2019-03-05&lat=yourquery&long=yourquery&enddate=` +
+    `http://20.43.96.83/predict?&startdate=2019-02-28&lat=yourquery&long=yourquery&enddate=` +
     dateFormated;
   console.log(url);
 
