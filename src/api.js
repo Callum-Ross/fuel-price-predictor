@@ -16,27 +16,32 @@ export async function siteDetails() {
     });
   return data;
 }
-export async function predictPrices(siteId) {
+export async function predictPrices(siteId, days) {
   //const proxyurl = "https://cors-anywhere.herokuapp.com/";
   console.log(siteId);
-  const url = `http://20.43.96.83/predict?&startdate=2019-03-05&lat=yourquery&long=yourquery&address=yourquery`;
   let data = {};
   var someDate = new Date("2019-03-05");
-  someDate.setDate(someDate.getDate() + 15); //number  of days to add, e.x. 15 days
+  someDate.setDate(someDate.getDate() + days); //number  of days to add, e.x. 15 days
   var dateFormated = someDate.toISOString().substr(0, 10);
-  dateFormated = JSON.stringify(dateFormated);
+
   console.log(dateFormated);
   const params = {
-    siteid: siteId.value,
-    enddate: dateFormated
+    siteid: siteId.value
   };
   console.log(siteId.value);
+
+  const url =
+    `http://20.43.96.83/predict?&startdate=2019-03-05&lat=yourquery&long=yourquery&address=yourquery&enddate=` +
+    dateFormated;
+  console.log(url);
+
   await axios
     .get("https://cors-anywhere.herokuapp.com/" + url, { params })
     .then(res => (data = { prediction: res.data }))
     .catch(err => {
       console.log(err);
     });
+  console.log(data);
   return data;
 }
 //   await fetch(proxyurl + url, {

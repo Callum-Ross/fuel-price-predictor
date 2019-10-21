@@ -8,13 +8,22 @@ import "react-awesome-button/dist/styles.css";
 import "./App.css";
 
 import { Line } from "react-chartjs-2";
+function randomColor() {
+  var color =
+    "rgb(" +
+    Math.round(Math.random() * 255) +
+    "," +
+    Math.round(Math.random() * 255) +
+    "," +
+    Math.round(Math.random() * 255) +
+    ")";
 
+  return color;
+}
 class Charty extends React.Component {
   render() {
-    var index = 0;
     var data = [];
     console.log(this.props.predict);
-
     if (typeof this.props.predict[0] !== "undefined") {
       console.log(this.props.predict[0]);
       for (var q of this.props.predict) {
@@ -22,6 +31,8 @@ class Charty extends React.Component {
         var label = [];
         var line = "";
         for (var x of q.prediction.results) {
+          var colour = randomColor();
+
           console.log(x);
           label.push(x.date);
           prices.push(x.price);
@@ -31,8 +42,8 @@ class Charty extends React.Component {
           label: line,
           fill: false,
           lineTension: 0.5,
-          backgroundColor: "rgba(75,192,192,1)",
-          borderColor: "rgba(0,0,0,1)",
+          backgroundColor: colour,
+          borderColor: colour,
           borderWidth: 2,
           data: prices
         });
@@ -49,7 +60,7 @@ class Charty extends React.Component {
       datasets: data
     };
     return (
-      <div style={{ height: 700, width: 1000 }}>
+      <div style={{ height: 700, width: "100%" }}>
         <Line
           data={state}
           options={{
@@ -93,8 +104,7 @@ class Dropdown extends React.Component {
     let type = "Loading...";
     if (typeof displayed.S !== "undefined") {
       if (this.props.props === 1) {
-        type =
-          "Please select a site location to predict, leave empty to select all..";
+        type = "Please select a site location to predict..";
         for (var site in displayed.S) {
           let label = displayed.S[site]["Site Name"];
           let value = displayed.S[site]["SiteId"];
@@ -155,12 +165,12 @@ function App() {
   const [predict, setPrediction] = useState([]);
   const [selected, setSelected] = useState([]);
   const [days, setDays] = useState([]);
-  console.log(days);
+  console.log(predict);
   useEffect(() => {
     siteDetails().then(res => setSites(res));
   }, []);
   var array = { Num: [] };
-  for (var i = 1; i < 21; i++) {
+  for (var i = 1; i < 15; i++) {
     array.Num.push({ value: i, label: i });
   }
   return (
@@ -204,6 +214,7 @@ function App() {
           onPress={async function() {
             var yes = await callPrices(selected, days);
             setPrediction(yes);
+            console.log(yes);
           }}
         >
           Predict them Prices!
