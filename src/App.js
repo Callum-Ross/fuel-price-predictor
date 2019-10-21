@@ -11,58 +11,55 @@ import { Line } from "react-chartjs-2";
 
 class Charty extends React.Component {
   render() {
-    const state = {
-      labels: ["January", "February", "March", "April", "May"],
+    var index = 0;
+    var data = [];
+    console.log(this.props.predict);
 
-      datasets: [
-        {
-          label: "Rainfall",
-
-          fill: false,
-
-          lineTension: 0.5,
-
-          backgroundColor: "rgba(75,192,192,1)",
-
-          borderColor: "rgba(0,0,0,1)",
-
-          borderWidth: 2,
-
-          data: [65, 59, 80, 81, 56]
-        },
-        {
-          label: "Not",
-
-          fill: false,
-
-          lineTension: 0.5,
-
-          backgroundColor: "rgba(75,192,192,1)",
-
-          borderColor: "rgba(0,0,0,1)",
-
-          borderWidth: 2,
-
-          data: [67, 55, 90, 92, 23]
+    if (typeof this.props.predict[0] !== "undefined") {
+      console.log(this.props.predict[0]);
+      for (var q of this.props.predict) {
+        var prices = [];
+        var label = [];
+        var line = "";
+        for (var x of q.prediction.results) {
+          console.log(x);
+          label.push(x.date);
+          prices.push(x.price);
+          line = "SiteID: " + x.siteid;
         }
-      ]
+        data.push({
+          label: line,
+          fill: false,
+          lineTension: 0.5,
+          backgroundColor: "rgba(75,192,192,1)",
+          borderColor: "rgba(0,0,0,1)",
+          borderWidth: 2,
+          data: prices
+        });
+      }
+    }
+
+    // for (var i of this.props.predict) {
+    //   prices.push(i.prediction.results[index].price / 1000);
+    //   index = index + 1;
+    // }
+
+    const state = {
+      labels: label,
+      datasets: data
     };
     return (
-      <div style={{ height: "60%", width: "70%", padding: "1%" }}>
+      <div style={{ height: 700, width: 1000 }}>
         <Line
           data={state}
           options={{
             title: {
               display: true,
-
-              text: "Predicted Price",
-
-              fontSize: 50
+              text: "Average Rainfall per month",
+              fontSize: 20
             },
-
             legend: {
               display: true,
-
               position: "right"
             }
           }}
@@ -74,13 +71,19 @@ class Charty extends React.Component {
 
 class Dropdown extends React.Component {
   state = {
-    selectedOption: null
+    selectedOption: null,
+    Days: null
   };
 
   handleChange = selectedOption => {
     this.setState({ selectedOption });
-
-    console.log(`Option selected:`, selectedOption);
+    this.props.setSelected(selectedOption);
+    console.log(selectedOption);
+  };
+  handleChange2 = Days => {
+    this.setState({ Days });
+    this.props.setDays(Days);
+    console.log(Days);
   };
 
   render() {
@@ -88,7 +91,6 @@ class Dropdown extends React.Component {
     let displayed = this.props.displayed;
     var options = [];
     let type = "Loading...";
-    console.log(displayed);
     if (typeof displayed.S !== "undefined") {
       if (this.props.props === 1) {
         type =
@@ -103,13 +105,13 @@ class Dropdown extends React.Component {
     }
     if (typeof displayed.Num !== "undefined") {
       if (this.props.props === 2) {
-        console.log("dfsdf");
         type = "How many days do you wish to predict?";
         options = displayed.Num;
       }
     }
 
     const { selectedOption } = this.state;
+    const { Days } = this.state;
 
     return (
       <>
@@ -137,8 +139,8 @@ class Dropdown extends React.Component {
               closeMenuOnSelect={false}
               components={animatedComponents}
               style={{ zIndex: "auto" }}
-              value={selectedOption}
-              onChange={this.handleChange}
+              value={Days}
+              onChange={this.handleChange2}
               options={options}
               placeholder={type}
             />
@@ -150,16 +152,17 @@ class Dropdown extends React.Component {
 }
 function App() {
   const [sites, setSites] = useState([]);
-
+  const [predict, setPrediction] = useState([]);
+  const [selected, setSelected] = useState([]);
+  const [days, setDays] = useState([]);
+  console.log(days);
   useEffect(() => {
     siteDetails().then(res => setSites(res));
   }, []);
-
   var array = { Num: [] };
   for (var i = 1; i < 21; i++) {
     array.Num.push({ value: i, label: i });
   }
-
   return (
     <div className="App">
       <div>
@@ -170,8 +173,18 @@ function App() {
         </h1>
       </div>
       <div style={{ display: "flex", justifyContent: "space-around" }}>
-        <Dropdown props={1} displayed={sites} />
-        <Dropdown props={2} displayed={array} />
+        <Dropdown
+          props={1}
+          displayed={sites}
+          setSelected={setSelected}
+          setDays={setDays}
+        />
+        <Dropdown
+          props={2}
+          displayed={array}
+          setSelected={setSelected}
+          setDays={setDays}
+        />
       </div>
       <div
         style={{
@@ -188,18 +201,26 @@ function App() {
       >
         <AwesomeButton
           type="primary"
-          onPress={() => {
-            predictPrices();
+          onPress={async function() {
+            var yes = await callPrices(selected, days);
+            setPrediction(yes);
           }}
         >
           Predict them Prices!
         </AwesomeButton>
       </div>
       <div style={{ display: "flex", justifyContent: "center" }}>
-        <Charty />
+        <Charty predict={predict} />
       </div>
     </div>
   );
 }
-
+async function callPrices(selected, days) {
+  var yes = [];
+  for (var i in selected) {
+    var pred = await predictPrices(selected[i], days.value);
+    yes.push(pred);
+  }
+  return yes;
+}
 export default App;
