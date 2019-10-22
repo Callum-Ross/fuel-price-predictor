@@ -40,7 +40,7 @@ class Charty extends React.Component {
         data.push({
           label: line,
           fill: false,
-          lineTension: 0.9,
+          lineTension: 0.1,
           backgroundColor: colour,
           borderColor: colour,
           borderWidth: 2,
@@ -92,7 +92,6 @@ class Dropdown extends React.Component {
   handleChange2 = Days => {
     this.setState({ Days });
     this.props.setDays(Days);
-    this.selectRef.select.blur();
   };
 
   render() {
@@ -150,7 +149,6 @@ class Dropdown extends React.Component {
               value={Days}
               onChange={this.handleChange2}
               options={options}
-              ref={input => (this.selectRef = input)}
               placeholder={type}
             />
           )}
@@ -164,6 +162,8 @@ function App() {
   const [predict, setPrediction] = useState([]);
   const [selected, setSelected] = useState([]);
   const [days, setDays] = useState([]);
+  const [loading, setLoading] = useState(false);
+
   useEffect(() => {
     siteDetails().then(res => setSites(res));
   }, []);
@@ -210,15 +210,23 @@ function App() {
         <AwesomeButton
           type="primary"
           onPress={async function() {
+            setLoading(true);
+
             var yes = await callPrices(selected, days);
+            setLoading(false);
             setPrediction(yes);
           }}
         >
           Predict them Prices!
         </AwesomeButton>
       </div>
+
       <div style={{ display: "flex", justifyContent: "center" }}>
-        <Charty predict={predict} />
+        {loading === false ? (
+          <Charty predict={predict} />
+        ) : (
+          <div class="loader" style={{ marginTop: "3%" }}></div>
+        )}
       </div>
     </div>
   );
