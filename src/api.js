@@ -4,7 +4,6 @@ export async function siteDetails() {
   //const proxyurl = "https://cors-anywhere.herokuapp.com/";
 
   const url = `http://20.43.96.83/sites`;
-  console.log("yes");
   let data = {};
   await axios
     .get("https://cors-anywhere.herokuapp.com/" + url, {
@@ -19,22 +18,33 @@ export async function siteDetails() {
 export async function predictPrices(siteId, days) {
   //const proxyurl = "https://cors-anywhere.herokuapp.com/";
   console.log(siteId);
+
+  let latThing = siteId.value.split(", ")[1];
+  let longThing = siteId.value.split(", ")[2];
+
+  let value = siteId.value.split(", ")[0];
+
   let data = {};
+  if (typeof days === "undefined") {
+    days = 3;
+  }
   var someDate = new Date("2019-02-28");
   someDate.setDate(someDate.getDate() + days); //number  of days to add, e.x. 15 days
   var dateFormated = someDate.toISOString().substr(0, 10);
-
   console.log(siteId.label);
-  const params = {
-    siteid: siteId.value,
-    address: siteId.label
-  };
-  console.log(siteId.value);
 
+  console.log(longThing);
+
+  console.log(latThing);
+  const params = {
+    siteid: value,
+    address: siteId.label,
+    lat: latThing,
+    lng: longThing
+  };
+  console.log(params);
   const url =
-    `http://20.43.96.83/predict?&startdate=2019-02-28&lat=yourquery&long=yourquery&enddate=` +
-    dateFormated;
-  console.log(url);
+    `http://20.43.96.83/predict?&startdate=2019-02-28&enddate=` + dateFormated;
 
   await axios
     .get("https://cors-anywhere.herokuapp.com/" + url, { params })
@@ -42,18 +52,7 @@ export async function predictPrices(siteId, days) {
     .catch(err => {
       console.log(err);
     });
+  data.location = [parseFloat(latThing), parseFloat(longThing)];
   console.log(data);
   return data;
 }
-//   await fetch(proxyurl + url, {
-//     method: "GET", // *GET, POST, PUT, DELETE, etc.
-//     mode: "cors", // no-cors, *cors, same-origin
-//     cache: "no-cache", // *default, no-cache, reload, force-cache, only-if-cached
-//     credentials: "same-origin" // include, *same-origin, omit
-//   })
-//     .then(response => {
-//       response.json();
-//     })
-//     .then(contents => (data = contents));
-//   return data;
-// }

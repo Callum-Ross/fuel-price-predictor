@@ -6,6 +6,9 @@ import { siteDetails, predictPrices } from "./api";
 import { AwesomeButton } from "react-awesome-button";
 import "react-awesome-button/dist/styles.css";
 import "./App.css";
+import { Map, Marker, Popup, TileLayer } from "react-leaflet";
+import { Tab, Tabs, TabList, TabPanel } from "react-tabs";
+import "react-tabs/style/react-tabs.css";
 
 import { Line } from "react-chartjs-2";
 function randomColor() {
@@ -33,9 +36,8 @@ class Charty extends React.Component {
           var colour = randomColor();
 
           label.push(x.date);
-          prices.push(x.price);
+          prices.push(x.price / 1000);
           line = x.address;
-          console.log(x);
         }
         data.push({
           label: line,
@@ -59,13 +61,13 @@ class Charty extends React.Component {
       datasets: data
     };
     return (
-      <div style={{ height: 700, width: "100%" }}>
+      <div style={{ height: 200, width: "100%" }}>
         <Line
           data={state}
           options={{
             title: {
               display: true,
-              text: "Fuel Price Predictor",
+              text: "Fuel Price Predictor, in AUD",
               fontSize: 20
             },
             legend: {
@@ -99,20 +101,22 @@ class Dropdown extends React.Component {
     let displayed = this.props.displayed;
     var options = [];
     let type = "Loading...";
+
     if (typeof displayed.S !== "undefined") {
       if (this.props.props === 1) {
         type = "Please select a site location to predict..";
         for (var site in displayed.S) {
           let label = displayed.S[site]["Site Name"];
-          let value = displayed.S[site]["SiteId"];
-          let option = { value: value, label: label };
+
+          let option = { value: displayed.S[site]["value"], label: label };
+
           options.push(option);
         }
       }
     }
     if (typeof displayed.Num !== "undefined") {
       if (this.props.props === 2) {
-        type = "How many days do you wish to predict?";
+        type = "How many days do you wish to predict? (Default is 3)";
         options = displayed.Num;
       }
     }
@@ -140,6 +144,7 @@ class Dropdown extends React.Component {
               options={options}
               placeholder={type}
               isMulti
+              hideSelectedOptions={false}
             />
           ) : (
             <Select
@@ -157,6 +162,91 @@ class Dropdown extends React.Component {
     );
   }
 }
+
+function graphPin(predict) {
+  var position = [];
+  position = predict.location;
+  console.log(predict.location);
+  console.log(predict);
+  var data = [];
+  var labelDates = [];
+  for (var dates of predict.prediction.results) {
+    labelDates.push(dates.date);
+  }
+  for (var yo of predict.prediction.results) {
+    data.push(yo.price);
+  }
+  //   console.log(labelDates);
+  const state = {
+    labels: labelDates,
+    datasets: [
+      {
+        label: predict.prediction.results[0].address,
+        backgroundColor: "rgba(75,192,192,1)",
+        borderColor: "rgba(0,0,0,1)",
+        borderWidth: 2,
+        data: data
+      }
+    ]
+  };
+  //   console.log(predict);
+  return (
+    <div style={{ marginRight: "2000%" }}>
+      <Marker
+        position={position}
+        style={{ height: "100%", width: "150%", marginRight: "100px" }}
+      >
+        <Popup>
+          <div style={{ height: 200, width: 325 }}>
+            <Line
+              data={state}
+              options={{
+                title: {
+                  display: true,
+                  text:
+                    "Fuel Forecast " + predict.prediction.results[0].address,
+                  fontSize: 15
+                },
+                legend: {
+                  display: false,
+                  position: "right"
+                }
+              }}
+            />
+          </div>
+        </Popup>
+      </Marker>
+      <div styling={{ width: 1000 }}></div>
+    </div>
+  );
+}
+
+function MapReact(predict) {
+  const position = [-27.4698, 153.0251];
+  //   console.log(predict);
+  console.log(predict.predict);
+  return (
+    <Map
+      center={position}
+      zoom={8}
+      style={{
+        height: "725px",
+        zIndex: 1,
+        width: "100%"
+      }}
+    >
+      <TileLayer
+        url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+        attribution="Jim Hogan"
+      />
+      {predict.predict.map(pined => {
+        console.log(pined);
+        return graphPin(pined);
+      })}
+    </Map>
+  );
+}
+
 function App() {
   const [sites, setSites] = useState([]);
   const [predict, setPrediction] = useState([]);
@@ -165,12 +255,27 @@ function App() {
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
-    siteDetails().then(res => setSites(res));
+    siteDetails().then(res => {
+      console.log(res);
+      for (var site of res.S) {
+        console.log(site);
+        let value =
+          site["SiteId"] +
+          ", " +
+          site["Site Latitude"] +
+          ", " +
+          site["Site Longitude"];
+        site.value = value;
+      }
+      console.log(res.S);
+      setSites(res);
+    });
   }, []);
   var array = { Num: [] };
   for (var i = 1; i < 20; i++) {
     array.Num.push({ value: i, label: i });
   }
+
   return (
     <div className="App">
       <div>
@@ -186,12 +291,14 @@ function App() {
           displayed={sites}
           setSelected={setSelected}
           setDays={setDays}
+          selected={selected}
         />
         <Dropdown
           props={2}
           displayed={array}
           setSelected={setSelected}
           setDays={setDays}
+          selected={selected}
         />
       </div>
       <div
@@ -200,43 +307,91 @@ function App() {
           display: "flex"
         }}
       ></div>
-      <div
-        style={{
-          justifyContent: "center",
-          display: "flex",
-          paddingTop: "2%"
-        }}
-      >
-        <AwesomeButton
-          type="primary"
-          onPress={async function() {
-            setLoading(true);
-
-            var yes = await callPrices(selected, days);
-            setLoading(false);
-            setPrediction(yes);
+      {selected.length > 0 ? (
+        <div
+          style={{
+            justifyContent: "center",
+            display: "flex",
+            paddingTop: "2%"
           }}
         >
-          Predict them Prices!
-        </AwesomeButton>
-      </div>
+          <AwesomeButton
+            type="primary"
+            onPress={async function() {
+              setLoading(true);
 
-      <div style={{ display: "flex", justifyContent: "center" }}>
-        {loading === false ? (
-          <Charty predict={predict} />
-        ) : (
-          <div class="loader" style={{ marginTop: "3%" }}></div>
-        )}
-      </div>
+              var yes = await callPrices(selected, days, sites);
+              setLoading(false);
+              console.log(yes);
+              setPrediction(yes);
+            }}
+          >
+            Predict them Prices!
+          </AwesomeButton>
+        </div>
+      ) : (
+        <div
+          style={{
+            justifyContent: "center",
+            display: "flex",
+            paddingTop: "4%"
+          }}
+        ></div>
+      )}
+
+      <Tabs style={{ paddingTop: "3%" }}>
+        <TabList>
+          <Tab>Map</Tab>
+          <Tab>Graph</Tab>
+        </TabList>
+
+        <TabPanel>
+          <h2 style={{ paddingTop: "2%" }}>
+            Map with Graphs, click the pins to see the graphs
+          </h2>
+          <div
+            style={{
+              paddingTop: "3%",
+              display: "flex",
+              justifyContent: "center"
+            }}
+          >
+            {loading === false ? (
+              <MapReact predict={predict} />
+            ) : (
+              <div
+                class="loader"
+                style={{
+                  marginTop: "3%"
+                }}
+              ></div>
+            )}
+          </div>
+        </TabPanel>
+        <TabPanel>
+          <h2>Graph with all locations</h2>
+          <div style={{ display: "flex", justifyContent: "center" }}>
+            {loading === false ? (
+              <div style={{ width: "60%" }}>
+                <Charty predict={predict} />
+              </div>
+            ) : (
+              <div class="loader" style={{ marginTop: "3%" }}></div>
+            )}
+          </div>
+        </TabPanel>
+      </Tabs>
     </div>
   );
 }
-async function callPrices(selected, days) {
+async function callPrices(selected, days, sites) {
   var yes = [];
+
   for (var i in selected) {
     var pred = await predictPrices(selected[i], days.value);
     yes.push(pred);
   }
+  console.log(yes);
   return yes;
 }
 export default App;
