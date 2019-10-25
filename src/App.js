@@ -166,8 +166,7 @@ class Dropdown extends React.Component {
 function graphPin(predict) {
   var position = [];
   position = predict.location;
-  console.log(predict.location);
-  console.log(predict);
+
   var data = [];
   var labelDates = [];
   for (var dates of predict.prediction.results) {
@@ -176,7 +175,6 @@ function graphPin(predict) {
   for (var yo of predict.prediction.results) {
     data.push(yo.price);
   }
-  //   console.log(labelDates);
   const state = {
     labels: labelDates,
     datasets: [
@@ -189,7 +187,6 @@ function graphPin(predict) {
       }
     ]
   };
-  //   console.log(predict);
   return (
     <div style={{ marginRight: "2000%" }}>
       <Marker
@@ -223,8 +220,6 @@ function graphPin(predict) {
 
 function MapReact(predict) {
   const position = [-27.4698, 153.0251];
-  //   console.log(predict);
-  console.log(predict.predict);
   return (
     <Map
       center={position}
@@ -240,7 +235,6 @@ function MapReact(predict) {
         attribution="Jim Hogan"
       />
       {predict.predict.map(pined => {
-        console.log(pined);
         return graphPin(pined);
       })}
     </Map>
@@ -256,9 +250,7 @@ function App() {
 
   useEffect(() => {
     siteDetails().then(res => {
-      console.log(res);
       for (var site of res.S) {
-        console.log(site);
         let value =
           site["SiteId"] +
           ", " +
@@ -267,7 +259,6 @@ function App() {
           site["Site Longitude"];
         site.value = value;
       }
-      console.log(res.S);
       setSites(res);
     });
   }, []);
@@ -321,10 +312,8 @@ function App() {
             type="primary"
             onPress={async function() {
               setLoading(true);
-
               var yes = await callPrices(selected, days, sites);
               setLoading(false);
-              console.log(yes);
               setPrediction(yes);
             }}
           >
@@ -393,7 +382,6 @@ async function callPrices(selected, days, sites) {
     var pred = await predictPrices(selected[i], days.value);
     yes.push(pred);
   }
-  console.log(yes);
   return yes;
 }
 export default App;
