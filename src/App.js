@@ -230,7 +230,7 @@ function MapReact(predict) {
       center={position}
       zoom={8}
       style={{
-        height: "725px",
+        height: "675px",
         zIndex: 1,
         width: "100%"
       }}
@@ -283,6 +283,8 @@ function App() {
           Fuel Price Prediction - CAB432
           <br />
           Callum Ross n10225684, Jack Hu n10176250
+          <br />
+          Choose a Site and Number of Days to Predict to get Started!
         </h1>
       </div>
       <div style={{ display: "flex", justifyContent: "space-around" }}>
@@ -351,7 +353,7 @@ function App() {
           </h2>
           <div
             style={{
-              paddingTop: "3%",
+              paddingTop: "0%",
               display: "flex",
               justifyContent: "center"
             }}
