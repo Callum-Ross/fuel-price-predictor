@@ -144,7 +144,6 @@ class Dropdown extends React.Component {
               options={options}
               placeholder={type}
               isMulti
-              hideSelectedOptions={false}
             />
           ) : (
             <Select
@@ -225,7 +224,7 @@ function MapReact(predict) {
       center={position}
       zoom={8}
       style={{
-        height: "675px",
+        height: "600px",
         zIndex: 1,
         width: "100%"
       }}
@@ -300,26 +299,36 @@ function App() {
           display: "flex"
         }}
       ></div>
-      {selected.length > 0 ? (
-        <div
-          style={{
-            justifyContent: "center",
-            display: "flex",
-            paddingTop: "2%"
-          }}
-        >
-          <AwesomeButton
-            type="primary"
-            onPress={async function() {
-              setLoading(true);
-              var yes = await callPrices(selected, days, sites);
-              setLoading(false);
-              setPrediction(yes);
+      {selected !== null ? (
+        selected !== 0 ? (
+          <div
+            style={{
+              justifyContent: "center",
+              display: "flex",
+              paddingTop: "2%"
             }}
           >
-            Predict them Prices!
-          </AwesomeButton>
-        </div>
+            <AwesomeButton
+              type="primary"
+              onPress={async function() {
+                setLoading(true);
+                var yes = await callPrices(selected, days, sites);
+                setLoading(false);
+                setPrediction(yes);
+              }}
+            >
+              Predict them Prices!
+            </AwesomeButton>
+          </div>
+        ) : (
+          <div
+            style={{
+              justifyContent: "center",
+              display: "flex",
+              paddingTop: "4%"
+            }}
+          ></div>
+        )
       ) : (
         <div
           style={{
@@ -337,7 +346,7 @@ function App() {
         </TabList>
 
         <TabPanel>
-          <h2 style={{ paddingTop: "2%" }}>
+          <h2 style={{ paddingBottom: "2%", fontSize: 50 }}>
             Map with Graphs, click the pins to see the graphs
           </h2>
           <div
@@ -360,10 +369,10 @@ function App() {
           </div>
         </TabPanel>
         <TabPanel>
-          <h2>Graph with all locations</h2>
+          <h2 style={{ fontSize: 50 }}>Graph with all locations</h2>
           <div style={{ display: "flex", justifyContent: "center" }}>
             {loading === false ? (
-              <div style={{ width: "60%" }}>
+              <div style={{ width: "50%" }}>
                 <Charty predict={predict} />
               </div>
             ) : (
